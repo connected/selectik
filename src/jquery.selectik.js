@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Ivan Kubrakov 
+// Copyright (c) 2012 Ivan Kubrakov
 // Selectik a jQuery custom select plugin http://brankub.github.com/selectik/
 
 (function($) {
@@ -11,20 +11,22 @@
 	var isOpera = (/opera/i.test(navigator.userAgent.toLowerCase()));
 	var isIE = (/msie/i.test(navigator.userAgent.toLowerCase()));
 	var isOperaMini  = Object.prototype.toString.call(window.operamini) === "[object OperaMini]";
-	
+
 	Selectik = function(options){
 		// merge options
         this.config = $.extend(true, {
 			containerClass: 'custom-select',
+			listClass:      'select-list',
             width: 0,
             maxItems: 0,
             customScroll: 1,
             speedAnimation:200,
 			smartPosition: true,
+			mobile: false,
 			minScrollHeight: 10 // pixels
         }, options || {});
-    };	
-	
+    };
+
     Selectik.prototype = {
         _init: function(element){
 			this.$cselect = $(element);
@@ -33,7 +35,7 @@
 			this.change = false;
 			this.fixScroll = false;
 			this.mouseDown = false;
-			
+
 			//Check select width
 			//Select width is inconsistent in different browser,
 			//so we wrap select by inline element and get it's width
@@ -42,20 +44,20 @@
 			    this.config.width = this.$cselect.parent().width();
 			    this.$cselect.parent().replaceWith( this.$cselect );
 			}
-			
+
 			this._generateContainer();
 			this._handlers();
 		},
 		// private method: wrap selects in divs and fire html generator
 		_generateContainer: function(){
-			this.$cselect.wrap('<div class="'+this.config.containerClass + (this.$cselect.attr('disabled') === 'disabled' ? ' disabled' : '') +'"></div>'); 
-			this.$container = this.$cselect.parent(); 
-			this._getList({ refreshHtml: false }); 
+			this.$cselect.wrap('<div class="'+this.config.containerClass + (this.$cselect.attr('disabled') === 'disabled' ? ' disabled' : '') + ((isMobile || isOperaMini)? ' mobile' : '') + '"></div>');
+			this.$container = this.$cselect.parent();
+			this._getList({ refreshHtml: false });
 		},
 		// private method: generate list html
 		_getList: function(e){
 			this.count = this.cselect.length;
-			if (e.refreshSelect){ $('.select-list', this.$container).remove(); }
+			if (e.refreshSelect){ $('.' + this.config.listClass, this.$container).remove(); }
 
 			// loop html
 			var html = this._generateHtml();
@@ -69,16 +71,18 @@
 
 			// check if first time or refresh
 			if (e.refreshSelect){
-				html = '<div class="select-list '+scrollClass+'">'+scrollHtml+'<ul>'+html+'</ul></div>';
-				$(html).prependTo(this.$container);
+				this.$listContainer = $('<div class="' + this.config.listClass + ' '+scrollClass+'">'+scrollHtml+'<ul>'+html+'</ul></div>');
+				this.$listContainer.prependTo(document.body);
 			}else{
-				html = '<span class="custom-text">'+this.$selected[0].text+'</span><div class="select-list '+scrollClass+'">'+scrollHtml+'<ul>'+html+'</ul></div>';
-				$(html).prependTo(this.$container);
+				$('<span class="custom-text">'+this.$selected[0].text+'</span>').prependTo(this.$container);
+				this.$listContainer = $('<div class="' + this.config.listClass + ' '+scrollClass+'">'+scrollHtml+'<ul>'+html+'</ul></div>');
+				this.$listContainer.appendTo(document.body);
 			}
-			
-			this.$list = $('ul', this.$container);
+
+
+			this.$list = $('ul', this.$listContainer);
 			this.$text = $('.custom-text', this.$container);
-			this.$listContainer = $('.select-list', this.$container);
+
 			this._clickHandler();
 
 			// give class to the selected element
@@ -87,7 +91,7 @@
 			// give width to elements
 			this.$container.removeClass('done');
 			this.setWidthCS(this.config.width);
-			
+
 			// standard top distance
 			this.standardTop = parseInt(this.$listContainer.css('top'));
 
@@ -162,7 +166,7 @@
 				selectik._shiftHelper(shiftL);
 				return false;
 			});
-			
+
 			// bind scroll on mousedown selecting
 	        this.$text.on('mousedown', function(e){ selectik._draggable(e, true); });
 
@@ -185,9 +189,9 @@
 						var listTopPosition = selectik.$list.parent().offset().top;
 						var listHeight = selectik.$list.outerHeight();
 						var direction = (selectik.topPosition > 0) ? -1 : 1;
-						var difference = (selectik.topPosition > 0) ? textHeight : 0;		
+						var difference = (selectik.topPosition > 0) ? textHeight : 0;
 						var cursorPosition = (e.clientY - (listTopPosition - difference - $(window).scrollTop()));
-						
+
 						if (cursorPosition < 0 || cursorPosition > (listHeight + textHeight)){
 							var deltaY = (cursorPosition < 0) ? 1 : -1;
 							var shiftL = parseInt(selectik.$list.css('top'))+(deltaY*selectik.heightItem);
@@ -223,7 +227,7 @@
 			}
 			if (!this.scrollL) { return; }
 			this._shiftHelper(-this.topShift);
-		},		
+		},
 		// private method: click on li
 		_clickHandler: function(){
 			var selectik = this;
@@ -231,8 +235,8 @@
 				if (selectik.change) { selectik.change = false; return true; }
 				if (!selectik._checkDisabled($(this), e)) return;
 				selectik.change = true;
-				selectik._changeSelected($(this));				
-			});	
+				selectik._changeSelected($(this));
+			});
 		},
 		// private method: handlers
 		_handlers: function(){
@@ -258,7 +262,7 @@
 				selectik.$cselect.focus();
 				selectik._fadeList(false, true);
 			});
-			
+
 			// mouse down/up
 			this.$text.bind('mousedown', function(e){
 				if (!selectik._checkDisabled(selectik.$container, e)) return;
@@ -332,19 +336,27 @@
 		},
 		// private method: show/hdie list
 		_fadeList: function(out, text){
+
+			//Don't show dropdown on mobile devices
+			if (isMobile || isOperaMini) {
+				return;
+			}
+
 			var $openList = $('.'+this.config.containerClass+'.open_list');
 			if ($openList.length == 1){
-				$openList.children('select').data('selectik').hideCS();	
+				$openList.children('select').data('selectik').hideCS();
 				return;
-			}		
+			}
             if (!text){
-                $openList.children('.select-list').stop(true, true).fadeOut(this.config.speedAnimation).parent().toggleClass('open_list');
+                $openList.children('.' + this.config.listClass).stop(true, true).fadeOut(this.config.speedAnimation);
+                this.$container.toggleClass('open_list');
                 if (out){ return; }
             }
+
 			openList = false;
 			this.positionCS();
 			this.$listContainer.stop(true, true).fadeToggle(this.config.speedAnimation);
-			this.$listContainer.parent().toggleClass('open_list');
+			this.$container.toggleClass('open_list');
 			var selectik = this;
 			setTimeout(function(){ openList = true; }, selectik.config.speedAnimation);
 		},
@@ -353,7 +365,7 @@
 			this.$listContainer.fadeOut(this.config.speedAnimation);
 			this.$container.removeClass('open_list');
             if (!next) this.$cselect.focus();
-			openList = true;		
+			openList = true;
 		},
 		// public method: show list
 		showCS: function(){
@@ -363,15 +375,33 @@
 		},
 		// public method: postion of list
 		positionCS: function(){
-			if (!this.config.smartPosition) return;
-			elParent = this.$listContainer.parent();
+
+			var offset = this.$container.offset();
+
+			if (!this.config.smartPosition) {
+
+				this.$listContainer.css({
+					top:  offset.top + this.$container.height(),
+					left: offset.left
+				});
+
+				return;
+			}
+
+			var elParent = this.$container;
+
 			var heightPosition = (this.scrollL) ? this.config.maxItems*this.heightItem : this.count*this.heightItem;
 			var quaItems = (this.scrollL) ? this.config.maxItems : this.count;
-			var $window = $(window);
+			var $window  = $(window);
 			var widnowScrollTop = $window.scrollTop();
-			var topPosition = ($window.height() - (elParent.offset().top - widnowScrollTop) - elParent.outerHeight() < heightPosition) ? -quaItems*this.heightItem-(elParent.outerHeight()/4) : this.standardTop;
+			var topPosition  = ($window.height() - (elParent.offset().top - widnowScrollTop) - elParent.outerHeight() < heightPosition) ? -quaItems*this.heightItem-(elParent.outerHeight()/4) : this.standardTop;
+
 			this.topPosition = ((elParent.offset().top - widnowScrollTop) < heightPosition && ($('html').height() - elParent.offset().top) > heightPosition) ? this.standardTop : topPosition;
-			this.$listContainer.css('top', this.topPosition);
+
+			this.$listContainer.css({
+				top:  offset.top + this.topPosition,
+				left: offset.left
+			});
 		},
 		// public method: refresh list
 		refreshCS: function() {
@@ -409,36 +439,38 @@
 				paddings = parentPaddings + elementPaddings;
 				$(this).css('width', width - paddings);
 			});
-		}		
+		}
 	};
 
 	$.fn.selectik = function(options, methods) {
-		if (isMobile || isOperaMini) return;
+
+		if (!options.mobile && (isMobile || isOperaMini)) return;
+
         return this.each(function() {
             if ($('optgroup', this).length > 0 || $(this).attr('multiple') == 'multiple') { return; }
             if (undefined == $(this).data('selectik')) {
                 // create a new instance of the plugin
 				var selectik = new Selectik(options);
-				
+
 				// apply new methods
 				for (i in methods){
 					selectik[i] = methods[i];
 				}
-				
+
 				// fire selectik
 				selectik._init(this);
                 $(this).data('selectik', selectik);
             }
         });
     };
-	
+
 	// global handlers
 	$(window).resize(function(){
         if (openList){
 			var $list = $('.open_list');
             if (!$list.length > 0) { return; }
-			
-            $list.children('select').data('selectik').positionCS($('.select-list:visible'));
+
+            $list.children('select').data('selectik').positionCS($('.' + this.config.listClass + ':visible'));
         }
 	});
 	$(document).bind('click', function(e){

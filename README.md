@@ -8,7 +8,6 @@ Features:
 * absolute list position
 * stylized input, default list on mobile devices
 * simplified sass/css styles, only basic stuff
-
 * TAB key control
 * original select key control
 * mouse wheel control

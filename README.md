@@ -1,10 +1,14 @@
-Selectik 
+Selectik
 ========
 Selectik  is jQuery select plugin, easy use, cross-browser alternative to the standard select form element which can be customised with CSS.
 All features of custom select and help you can find on <a href="http://brankub.github.com/selectik">demo page</a>.
 
 Features:
 ---------
+* absolute list position
+* stylized input, default list on mobile devices
+* simplified sass/css styles, only basic stuff
+
 * TAB key control
 * original select key control
 * mouse wheel control
@@ -78,7 +82,7 @@ Plugin parametrs
 + **Speed of animation (speedAnimation)** - speed of show/hide animation in milliseconds. Default value - '200'.
 
 + **Smart positioning**. Default value - 'true'.
-                                                                                                      
+
 - Example of using parametrs:
 ```
 $('select').selectik({
@@ -129,7 +133,7 @@ Change/add methods:
 Now you can change/add methods for custom select. For example you need to change method of generation html for the list:
 ```
 $('select').selectik(
-  {maxItems: 8}, // options 
+  {maxItems: 8}, // options
   {
     _generateHtml: function(){ // changed method
       this.$collection = this.$cselect.children();
@@ -143,7 +147,7 @@ $('select').selectik(
       return html;
     }
   }
-); 
+);
 ```
 
 Support browsers:
@@ -159,4 +163,4 @@ Copyright
 ---------
 
 Copyright (c) 2012, Ivan Kubrakov <a href="mailto:kubrakov.i@gmail.com">kubrakov.i@gmail.com</a>
-        
+

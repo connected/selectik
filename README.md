@@ -18,6 +18,10 @@ Features:
 
 **Updates:**
 
+Now select list has absolute position, so you can use overflow hidden on select input.
+
+On mobile devices (iphone, ipad, android), select box will be stylized same way as on desktop, but default select list will be used.
+
 Added additional parameter 'minScrollHeight' for scroll:
 
 ```

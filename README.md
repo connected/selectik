@@ -18,7 +18,7 @@ Features:
 
 **Updates:**
 
-Now select list has absolute position, so you can use overflow hidden on select input.
+Now select list has absolute position, so you can use "overflow: hidden" style rule on customized select wrapper.
 
 On mobile devices (iphone, ipad, android), select box will be stylized same way as on desktop, but default select list will be used.
 

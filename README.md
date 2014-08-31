@@ -8,7 +8,6 @@ Features:
 * absolute list position
 * stylized input, default list on mobile devices
 * simplified sass/css styles, only basic stuff
-
 * TAB key control
 * original select key control
 * mouse wheel control
@@ -18,6 +17,10 @@ Features:
 * auto/cutsom width
 
 **Updates:**
+
+Now select list has absolute position, so you can use "overflow: hidden" style rule on customized select wrapper.
+
+On mobile devices (iphone, ipad, android), select box will be stylized same way as on desktop, but default select list will be used.
 
 Added additional parameter 'minScrollHeight' for scroll:
 

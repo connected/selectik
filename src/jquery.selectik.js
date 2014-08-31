@@ -22,7 +22,7 @@
             customScroll: 1,
             speedAnimation:200,
 			smartPosition: true,
-			mobile: false,
+			mobile: true,
 			minScrollHeight: 10 // pixels
         }, options || {});
     };
